@@ -8,7 +8,6 @@ app.use(express.json());
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-// Test route
 app.get("/", (req, res) => {
   res.send("Pawar AI backend is running ✅");
 });
@@ -17,7 +16,7 @@ app.post("/api/chat", async (req, res) => {
   try {
     const userMessage = req.body.message;
     if (!userMessage) {
-      return res.status(400).json({ error: "No message received" });
+      return res.status(400).json({ reply: "No message received." });
     }
 
     const response = await fetch(
@@ -37,16 +36,17 @@ app.post("/api/chat", async (req, res) => {
     );
 
     const data = await response.json();
-    console.log("Gemini response:", data);
 
-    const reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "No response from AI.";
+    if (!data.candidates || !data.candidates[0]) {
+      console.error("Gemini error response:", data);
+      return res.json({ reply: "⚠️ AI is busy or quota exhausted. Please try again later." });
+    }
 
+    const reply = data.candidates[0].content.parts[0].text;
     res.json({ reply });
   } catch (error) {
     console.error("Backend error:", error);
-    res.status(500).json({ error: "AI connection failed" });
+    res.status(500).json({ reply: "❌ Server error. Please try again later." });
   }
 });
 
