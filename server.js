@@ -38,18 +38,17 @@ app.post("/api/chat", async (req, res) => {
     const data = await response.json();
 
     if (!data.candidates || !data.candidates[0]) {
-      console.error("Gemini error response:", data);
-      return res.json({ reply: "⚠️ AI is busy or quota exhausted. Please try again later." });
+      console.error("Gemini API Error:", data);
+      return res.json({ reply: "⚠️ AI is busy or quota exhausted. Try later." });
     }
 
     const reply = data.candidates[0].content.parts[0].text;
     res.json({ reply });
   } catch (error) {
-    console.error("Backend error:", error);
-    res.status(500).json({ reply: "❌ Server error. Please try again later." });
+    console.error("Server Error:", error);
+    res.status(500).json({ reply: "❌ Server error. Please try again." });
   }
 });
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log("Server running...");
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
